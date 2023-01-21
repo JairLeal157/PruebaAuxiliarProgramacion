@@ -38,6 +38,7 @@ async def update_user(user:User):
         connection.execute(userTable.update().values(dict_user).where(userTable.c.id == user.id))
     return
 
+
 @users.delete("/delete/{id}")
 async def delete_user(id:int):
     with engine.connect() as connection:
