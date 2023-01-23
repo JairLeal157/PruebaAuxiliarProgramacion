@@ -1,4 +1,6 @@
 from pydantic import BaseModel,Field
+from models.Products import products as productTable
+from config.connection import engine
 
 
 class Product(BaseModel):
@@ -8,3 +10,9 @@ class Product(BaseModel):
     url: str = Field(title="URL", description="URL del producto", max_length=255)
 
 example_product = Product(nombre="Producto 1", precio=100.00, url="https://www.google.com/image.png").dict()
+
+def existeProducto(id:int):
+    with engine.connect() as connection:
+        result = connection.execute(productTable.select().where(productTable.c.id == id)).fetchall()
+        if len(result) == 0: return False
+    return True
