@@ -1,5 +1,5 @@
-from fastapi import APIRouter
-from schemas.User import User
+from fastapi import APIRouter, Body
+from schemas.User import User, example_user
 from models.Users import users as userTable
 from config.connection import engine
 from werkzeug.security import generate_password_hash,check_password_hash
@@ -9,20 +9,20 @@ users = APIRouter(prefix="/users")
 encriptar = lambda contraseña: generate_password_hash(contraseña, method="sha256", salt_length=30)
 verificar = lambda contraseña, hash: check_password_hash(hash, contraseña)
 
-@users.get("/")
+@users.get("/", response_model=list[User])
 async def get_users():
     with engine.connect() as connection:
         result = connection.execute(userTable.select()).fetchall()
     return result
 
-@users.get("/{id}")
+@users.get("/{id}", response_model=User)
 async def get_user(id:int):
     with engine.connect() as connection:
         result = connection.execute(userTable.select().where(userTable.c.id == id)).fetchall()[0]
     return result
 
-@users.post("/create", response_model= User)
-async def create_users(user:User):
+@users.post("/create")
+async def create_users(user:User = Body(example=example_user)):
     with engine.connect() as connection:
         user.id = None
         user.contraseña = encriptar(user.contraseña);
@@ -31,7 +31,7 @@ async def create_users(user:User):
     return user
 
 @users.put("/update/")
-async def update_user(user:User):
+async def update_user(user:User = Body(example=example_user)):
     with engine.connect() as connection:
         user.contraseña = encriptar(user.contraseña);
         dict_user = user.dict()
