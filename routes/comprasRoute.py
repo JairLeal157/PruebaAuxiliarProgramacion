@@ -4,6 +4,8 @@ from schemas.Product import existeProduct
 from schemas.Compra import Compra, example_compra
 from models.Compras import compras as compraTable
 from config.connection import engine
+
+
 compra = APIRouter(prefix="/compras")
 
 
