@@ -8,6 +8,7 @@ users = APIRouter(prefix="/users")
 
 @users.get("/", response_model=list[User], status_code=status.HTTP_200_OK)
 async def get_users():
+    result = []
     with engine.connect() as connection:
         result = connection.execute(userTable.select()).fetchall()
         if len(result) == 0: raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No hay usuarios")
@@ -35,6 +36,7 @@ async def create_users(user:User = Body(example=example_user)):
 async def update_user(id:int, user:User = Body(example=example_user)):
     if not existeUser(id): raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No existe el usuario")
     with engine.connect() as connection:
+        user.id = id
         user.contraseña = encriptar(user.contraseña);
         dict_user = user.dict()
         connection.execute(userTable.update().values(dict_user).where(userTable.c.id == id))
